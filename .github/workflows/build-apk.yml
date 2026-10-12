@@ -16,8 +16,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+    
       - name: Generate Gradle wrapper (if gradlew is missing)
         run: |
           if [ ! -f gradlew ]; then
