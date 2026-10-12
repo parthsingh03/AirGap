@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AirGap</string>
+    <string name="tagline">// OFFLINE GROUP CHAT — NO INTERNET · NO SERVER · MESH RELAY</string>
+    <string name="nickname_hint">CALLSIGN / NICKNAME</string>
+    <string name="start">START</string>
+    <string name="stop">STOP</string>
+    <string name="send">SEND</string>
+    <string name="message_hint">TRANSMISSION…</string>
+    <string name="status_format">STATUS: %1$s</string>
+    <string name="peers_format">CONNECTED: %1$d · NEARBY: %2$s</string>
+    <string name="you_label">YOU</string>
+    <string name="via_relay_suffix"> - VIA RELAY</string>
+</resources>
