@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Tactical chat-bubble mark: white bubble, signal-red mesh dots, on black. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,30 h40 a8,8 0 0 1 8,8 v22 a8,8 0 0 1 -8,8 h-24 l-12,12 v-12 a8,8 0 0 1 -4,-7 z" />
+    <path
+        android:fillColor="#FF2E2E"
+        android:pathData="M38,45 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 M50,45 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 M62,45 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+</vector>
