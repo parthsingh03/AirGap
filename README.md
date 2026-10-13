@@ -1,158 +1,93 @@
-# AirGap v2
+# AirGap 📡
 
-A BitChat-style **offline group messaging app for Android**. No internet, no
-server, no accounts, no phone numbers — phones talk **directly to each other**
-when they're near each other, and in v2 a message can **hop through a middle
-phone** to reach someone further away.
+### Messaging with no internet. No server. No accounts. Just phones talking to phones.
 
-v2 is a separate project from v1 (v1 stays frozen). Changes in v2, and only
-these: **(1) a GOTHAM tactical black/white/red UI** and **(2) mesh relay**.
-Everything else — Nearby transport, permissions, room flow — is v1's.
+[![Build APK](https://github.com/parthsingh03/AirGap/actions/workflows/build-apk.yml/badge.svg)](https://github.com/parthsingh03/AirGap/actions/workflows/build-apk.yml)
+![Kotlin](https://img.shields.io/badge/Kotlin-1.9.24-7F52FF?logo=kotlin&logoColor=white)
+![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white)
+![INTERNET permission](https://img.shields.io/badge/INTERNET%20permission-NONE-red)
 
-> ⚠️ **All testers must run v2.** The v2 wire protocol (`MSG|…`, see below)
-> is not compatible with v1's plain `nickname: message` format. A v2 phone
-> will still *display* a stray plain-format message, but v1 phones cannot
-> parse or relay v2 messages.
+AirGap is an **offline mesh messaging app for Android**, inspired by Jack Dorsey's BitChat. Open it, pick a nickname, and chat with people physically near you — over Bluetooth and Wi-Fi Direct — even with mobile data off, Wi-Fi disconnected, or airplane mode on (radios re-enabled). The app doesn't even *request* the `INTERNET` permission: your messages physically cannot leave the phones around you.
 
-## What's new in v2
+<p align="center">
+  <img src="docs/ui-preview.png" width="320" alt="AirGap tactical UI preview"/>
+  <br/><em>UI preview — GOTHAM-style tactical black / white / signal-red theme.</em>
+</p>
 
-### 1. GOTHAM tactical UI
+## ✨ Why AirGap exists
 
-- Pure black background (`#000000`), white text, one signal-red accent
-  (`#FF2E2E`). Only black, white and red, anywhere.
-- Monospace everywhere, sharp square corners, red-bordered inputs,
-  red START/STOP and SEND buttons.
-- Messages are angular blocks, not plain lines:
-  - **Mine** — right-aligned, dark red-tinted block with a red accent bar,
-    sender label `YOU`.
-  - **Theirs** — left-aligned, dark grey block with a grey border, sender
-    nickname in red caps — plus a `- VIA RELAY` label when the message
-    arrived through a relay phone.
-  - **System** — centered red mono lines like `>> AARAV JOINED THE ROOM`.
+Networks fail exactly when communication matters most — power cuts, disasters, jammed networks at packed events, hostels and campuses with dead zones, treks and convoys far from any tower. AirGap turns every phone running it into a tiny cell tower: a private, infrastructure-free chat room that exists wherever a few people are standing.
 
-### 2. Mesh relay
+## 🚀 Features
 
-How a message travels in v2, in plain words:
+- **Truly offline** — no internet, SIM, router, server or account anywhere in the path
+- **One shared room** — everyone nearby with the app open is in the same group chat
+- **Mesh relay** — messages can hop through a middle phone to reach further (up to 3 hops), so the room stretches beyond one phone's range
+- **Nickname-only identity** — no sign-up, no phone number, nothing to register
+- **Tactical UI** — black / white / signal-red, monospace, with `VIA RELAY` labels showing which messages arrived through a hop
+- **Zero data collection** — there is no backend to collect anything
 
-- Phones **A** and **C** are too far apart to reach each other, but phone
-  **B** is in the middle, running AirGap with the room open, and B is
-  connected to both sides. A sends a message → B receives it → **B
-  automatically forwards it to C**. Neither A nor C does anything special.
-- Every message carries a random **id** and a **hop budget (ttl) that starts
-  at 3**. Each relay phone subtracts 1 before forwarding, and a phone only
-  forwards while the incoming ttl is above 1 — so one message can cross
-  **at most 3 hops**.
-- Each phone remembers the ids it has already seen (a set capped at 500,
-  oldest evicted first). A copy of a message that loops back is **dropped**,
-  never shown twice and never re-sent by its author.
-- The wire format is `MSG|<id>|<ttl>|<nickname>|<text>`. Only the first four
-  `|` characters are separators, so `|` and `: ` inside a message survive
-  intact. Nicknames can't contain `|` (it's stripped when you start).
+## 🔗 How the mesh works
 
-## Honest v2 limits
+```text
+  A ──────────────► B ──────────────► C ──────────────► D
+  │                                                     
+  └─ ttl = 3         └─ ttl = 2        └─ ttl = 1 ──► stops
+```
 
-- **Relay only works while the relay phone's app is open** with the room
-  started, and only if it is connected to both sides at that moment.
-  Nothing is stored for later delivery.
-- **Everyone in the test group must run v2** (see the warning above).
-- **Android only**, same as v1.
-- **Still untested on real devices.** This code was compile-checked and
-  structurally reviewed, but Nearby/Bluetooth behaviour can only be proven
-  on real phones sitting near each other. Expect a fix round after the
-  first real-world test anyway — that's normal for nearby-radio apps.
-- Internet is needed only to download/install the APK once. After that the
-  chat itself needs no internet at all (the app doesn't even request the
-  `INTERNET` permission).
+- Phones discover each other automatically (Google Nearby Connections, `P2P_CLUSTER`) — Bluetooth handles discovery, Wi-Fi Direct carries the messages.
+- Range per hop: roughly **30–100 m in the open, 10–30 m indoors**.
+- Every message carries an id and a **hop budget (ttl) of 3**. Each relay phone forwards it with ttl − 1; at ttl 1 it is displayed but not forwarded. Duplicate copies are recognised by id and dropped — no loops, no spam.
+- A relay phone needs nothing from its owner: app open = silent infrastructure.
 
-## How it works (transport, same as v1)
+## 📲 Download & install
 
-- Google's **Nearby Connections API** (`play-services-nearby` **19.3.0**)
-  with strategy **`P2P_CLUSTER`** — many-to-many, one shared chat room.
-- Every phone **advertises and discovers at the same time** and
-  auto-connects to other AirGap phones it finds.
-- Nearby carries data over the phones' **Bluetooth and local Wi-Fi radios,
-  directly between devices**. There is no server anywhere in the path.
+1. Open the repo's **Actions** tab → latest green **Build APK** run → download the **`AirGap-debug-apk`** artifact (contains `app-debug.apk`). *(A one-tap download via Releases is coming.)*
+2. On your Android phone, tap the `.apk` and allow **Install from this source** when prompted (standard for apps installed outside the Play Store).
+3. Open AirGap, allow the Bluetooth / nearby-devices permissions, enter a nickname, tap **START**.
 
-## Build it in Android Studio
+> ⚠️ All phones in a room must run the **same version** (v2's relay protocol is not compatible with v1).
 
-1. Install Android Studio (it bundles the Android SDK and a JDK).
-2. Open this project folder (`File → Open…`), let Gradle sync.
-3. If Android Studio offers to generate / update the **Gradle wrapper**,
-   accept — this repo ships `gradle/wrapper/gradle-wrapper.properties`
-   (Gradle 8.7) but not the wrapper jar/scripts; Android Studio and the
-   GitHub Actions workflow both generate them automatically.
-4. Connect an Android phone with USB debugging on, or use an emulator for
-   the UI only (emulators can't test Nearby with real phones), and Run ▶.
+## 🧪 The 2-minute field test
 
-Requirements baked into the project: `minSdk 26` (Android 8+),
-`compileSdk / targetSdk 34`, JDK 17, Kotlin 1.9.24, AGP 8.5.2.
+1. Two (or more) Android phones, AirGap v2 installed.
+2. **Airplane mode ON**, then manually switch **Wi-Fi and Bluetooth back ON**. Mobile data fully off.
+3. Open AirGap on both, different nicknames, tap **START**.
+4. Send a message. It arrives — with no network of any kind involved. That's the whole demo.
+5. **Relay test:** put a third phone between the two, out of the first phone's direct reach — watch the far phone receive it stamped **`VIA RELAY`**.
 
-## Publish on GitHub (Parth's route)
+## 🛠️ Tech stack
 
-1. On GitHub, **create a new public repo named `AirGap`**.
-2. **Upload/push the project files** — everything in this folder goes at the
-   repo root (README, `app/`, `.github/`, gradle files). Don't upload the
-   `.zip` itself, upload its *contents*.
-3. Open the repo's **Actions** tab → the **Build APK** workflow runs on
-   push. Wait for the green ✓.
-4. Open the finished run and download the **`AirGap-debug-apk`** artifact.
-   Inside is `app-debug.apk`.
-5. In the repo, go to **Releases → Draft a new release**, tag it (e.g.
-   `v2.0`), **attach `app-debug.apk`**, and publish.
-6. **Share the release link with friends** — that page is the download shop.
-   They install once (steps below); the chat then runs fully offline.
+| Layer | Tech |
+| --- | --- |
+| Language | Kotlin 1.9.24 |
+| Transport | Google Nearby Connections (`play-services-nearby` 19.3.0), `P2P_CLUSTER` |
+| Mesh protocol | `MSG\|<id>\|<ttl>\|<nickname>\|<text>` — id dedup (seen-set, cap 500), ttl-based forwarding |
+| Min / target SDK | 26 (Android 8) / 34 |
+| Build | Gradle 8.7 · AGP 8.5.2 · JDK 17 · GitHub Actions CI |
 
-## How friends install it (sideloading)
+**Permissions:** Bluetooth, Wi-Fi state, and location (Android requires it for nearby-device discovery on older versions) — and deliberately **no `INTERNET`**. The manifest is the privacy policy.
 
-1. Open the GitHub Release link on the Android phone and download the `.apk`.
-2. Tap the downloaded `.apk`.
-3. Android will say installs from this source are blocked — tap **Settings**
-   on that prompt, turn on **Allow from this source** for the browser/Files
-   app, go back, and tap **Install**. Standard one-time step for any app
-   installed outside the Play Store.
-4. Open AirGap, allow the Bluetooth / nearby-devices permission prompts.
+## 🗺️ Roadmap
 
-## Testing it
+- [ ] Raise relay ttl 3 → 7 (campus-scale reach)
+- [ ] End-to-end encryption (current version is plaintext — see below)
+- [ ] Structured field reports + a bridge into the **GOTHAM** intel dashboard (`AIRGAP MESH` source)
+- [ ] GitHub Release with a one-tap APK download
+- [ ] Launcher icon from the final logo
 
-**Basic test (2+ phones):** same as v1 — Bluetooth + Wi-Fi radios ON,
-mobile data OFF (or airplane mode with the radios switched back on), app
-open on all phones, distinct nicknames, tap **Start**, send a message.
+## ⚠️ Honest limitations
 
-**Relay test (3 phones, the v2 moment):**
+- **Plaintext (for now).** Anyone running AirGap in your room can read the room's messages. Encryption is the top roadmap item — do not treat v2 as a secure channel yet.
+- Relay only works through phones that **have AirGap installed and open** — a phone without the app is invisible to the mesh.
+- Nothing is stored or delivered later: if nobody is in range, the message goes nowhere. No offline inbox.
+- Android only. iOS does not expose the radios this design needs in the same way.
 
-1. Line the phones up A — B — C, spaced so A and C are at (or beyond) the
-   edge of each other's direct range, with B in the middle. A corridor or
-   three adjacent rooms works well.
-2. All three: AirGap v2 open, nicknames set, **Start** tapped. Wait until
-   each phone's peers line shows its neighbours.
-3. From **A**, send a message. If it appears on **C** with C's sender label
-   reading **`<A's name> - VIA RELAY`** — the hop through B worked. 🎉
-4. Note: B will also show the message (B is a room member, not just a pipe).
+## 👨‍💻 Author
 
-Troubleshooting: if a phone doesn't appear, toggle Bluetooth off/on, make
-sure the permission prompts were allowed (Settings → Apps → AirGap →
-Permissions), and for the relay test keep B's app open and in the middle.
+Built by **Parth Singh** — B.Tech ECE @ GLA University.
+Portfolio: https://parthsingh03.github.io · GitHub: [@parthsingh03](https://github.com/parthsingh03)
 
-## Project layout
+---
 
-- `app/src/main/java/com/parth/airgap/MainActivity.kt` — the room:
-  permissions, advertising + discovery, connections, the MSG wire protocol,
-  dedup seen-set and relay forwarding.
-- `app/src/main/java/com/parth/airgap/ChatAdapter.kt` /
-  `ChatMessage.kt` — the tactical message list (mine / theirs / system).
-- `app/src/main/res/layout/activity_main.xml` — the single screen;
-  `item_message_mine.xml` / `item_message_theirs.xml` /
-  `item_message_system.xml` — the three message rows;
-  `res/drawable/bg_*.xml` — tactical borders/blocks;
-  `res/values/colors.xml` — the black/white/red palette.
-- `.github/workflows/build-apk.yml` — builds the shareable debug APK.
-- `FRIEND-TEST-GUIDE.md` — the guide to send to testers.
-
-## Changelog vs v1
-
-- UI: green palette + plain text rows → tactical black/white/red palette,
-  monospace, three message block types.
-- Protocol: plain `nickname: message` → `MSG|<id>|<ttl>|<nickname>|<text>`
-  with dedup + up-to-3-hop relay.
-- Nothing else changed: same transport, permissions, room behaviour, and
-  still deliberately **no INTERNET permission**.
+*Theory is cheap. Working systems are the argument.*
