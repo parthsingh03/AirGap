@@ -9,7 +9,7 @@
 AirGap lets people standing near each other chat on their phones **without any network at all** — no mobile data, no Wi-Fi router, no SIM needed. Phones connect directly over Bluetooth and Wi-Fi Direct. The app does not request the `INTERNET` permission, so messages cannot leave the group of phones around you.
 
 <p align="center">
-  <img src="docs/ui-preview.png" width="300" alt="AirGap UI preview"/>
+  <img src="docs/ui-preview.svg" width="300" alt="AirGap UI preview"/>
 </p>
 
 ## What it does
